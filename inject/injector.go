@@ -10,10 +10,10 @@ import (
 const INJECT = `
 package main
 
-import "fmt"
+//import "fmt"
 
 func a(){
-	fmt.Println("did it")
+	__traceStack()
 }
 `
 
@@ -45,7 +45,7 @@ func NewInjector() *Injector {
 	if err != nil {
 		panic(err)
 	}
-	i.MyImport = f.Imports[0]
+
 	for _, d := range f.Decls {
 		if fd, ok := d.(*ast.FuncDecl); ok {
 			i.Mystate = fd.Body.List[0]

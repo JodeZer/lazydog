@@ -15,11 +15,11 @@ import (
 
 func WriteDogHelper(path, pkg string) {
 	fset := token.NewFileSet()
-	fbytes, err := ioutil.ReadFile("dogHelper.go")
+	fbytes, err := ioutil.ReadFile("inject/dogHelper.go")
 	if err != nil {
 		panic(err)
 	}
-	f, err := parser.ParseFile(fset, "gatway.go", fbytes, 0)
+	f, err := parser.ParseFile(fset, "dogHelper.go", fbytes, 0)
 	if err != nil {
 		panic(err)
 	}
@@ -39,5 +39,5 @@ func genPath(path, pkg string) string {
 	if !strings.HasSuffix(path, "/") && len(path) != 0 {
 		suffix = "/"
 	}
-	return suffix + path + "gen_" + pkg + "_dgh.go"
+	return path + suffix + "gen_" + pkg + "_dgh.go"
 }
