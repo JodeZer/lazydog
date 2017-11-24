@@ -10,6 +10,8 @@ import (
 	pkgPath "path"
 	"runtime"
 	"strings"
+
+	"github.com/JodeZer/lazydog/file"
 )
 
 type DogHelper struct {
@@ -56,5 +58,5 @@ func genPath(path, pkg string) string {
 	if !strings.HasSuffix(path, "/") && len(path) != 0 {
 		suffix = "/"
 	}
-	return path + suffix + "gen_" + pkg + "_lzdgen.go"
+	return path + suffix + "gen_" + pkg + file.HelperSuffix
 }

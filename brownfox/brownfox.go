@@ -41,7 +41,7 @@ func (b *BrownFox) Restore() error {
 		if err := b.RestorePath(dir); err != nil {
 			return err
 		}
-		gofiles := file.ListGoFile(dir)
+		gofiles := file.ListGoFile(dir, false)
 
 		parser := inject.NewParser(token.NewFileSet(), gofiles[0])
 		if err := parser.Parse(); err != nil {
@@ -59,7 +59,7 @@ func (b *BrownFox) Restore() error {
 
 func (b *BrownFox) Inject() error {
 	for _, dir := range b.dirs {
-		for _, gofile := range file.ListGoFile(dir) {
+		for _, gofile := range file.ListGoFile(dir, false) {
 
 			fset := token.NewFileSet()
 			parser := inject.NewParser(fset, gofile)

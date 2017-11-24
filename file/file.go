@@ -7,6 +7,7 @@ import (
 )
 
 const BackupSuffix = ".ld"
+const HelperSuffix = "_lzdgen.go"
 
 //===== funcs
 
@@ -28,11 +29,11 @@ func hiddenDir(path string) bool { // just tmp impl
 	return last[0] == '.' && last[1] != '.'
 }
 
-func ListGoFile(path string) []string {
-	return listSuffixFile(path, []string{".go"}, "_test.go", "_lzdgen.go")
+func ListGoFile(path string, jumpBacked bool) []string {
+	return listSuffixFile(path, []string{".go"}, jumpBacked, "_test.go", HelperSuffix)
 }
 
-func listSuffixFile(path string, include []string, exclude ...string) []string {
+func listSuffixFile(path string, include []string, jumpBacked bool, exclude ...string) []string {
 	fis, err := ioutil.ReadDir(path)
 	if err != nil {
 		panic(err)
@@ -47,6 +48,14 @@ func listSuffixFile(path string, include []string, exclude ...string) []string {
 				continue
 			}
 		}
+
+		// backup file exists
+		if jumpBacked {
+			if _, err := os.Stat(path + "/" + fi.Name() + BackupSuffix); !os.IsNotExist(err) {
+				continue
+			}
+		}
+
 		for _, inclu := range include {
 			if strings.HasSuffix(fi.Name(), inclu) {
 				farray = append(farray, path+"/"+fi.Name())
@@ -56,10 +65,10 @@ func listSuffixFile(path string, include []string, exclude ...string) []string {
 	return farray
 }
 
-func ListGoFileByPaths(paths []string) []string {
+func ListGoFileByPaths(paths []string, jumpBacked bool) []string {
 	ret := []string{}
 	for _, path := range paths {
-		fs := ListGoFile(path)
+		fs := ListGoFile(path, jumpBacked)
 		ret = append(ret, fs...)
 	}
 	return ret
@@ -118,7 +127,7 @@ type Jumper struct {
 }
 
 func (j *Jumper) BackupPath(path string) error {
-	files := ListGoFile(path)
+	files := ListGoFile(path, true)
 	for _, fn := range files {
 		if err := copyFile(fn, backupFileName(fn)); err != nil {
 			return err
@@ -128,7 +137,7 @@ func (j *Jumper) BackupPath(path string) error {
 }
 
 func (j *Jumper) RestorePath(path string) error {
-	files := listSuffixFile(path, []string{".go" + BackupSuffix})
+	files := listSuffixFile(path, []string{".go" + BackupSuffix}, false)
 	for _, fn := range files {
 		if err := copyFile(fn, restoreFileName(fn)); err != nil {
 			return err
