@@ -2,39 +2,11 @@ package file
 
 import (
 	"io/ioutil"
+	"os"
 	"strings"
-
-	"github.com/jodezer/lazydog/inject"
 )
 
 const BackupSuffix = ".ld"
-
-type BrownFox struct {
-	path   string
-	deepth int
-	inject *inject.Injector
-	jumper
-}
-
-func NewBrownFox(path string, deepth int) *BrownFox {
-	return &BrownFox{
-		path:   path,
-		deepth: deepth,
-		inject: inject.NewInjector(),
-	}
-}
-
-func Backup(b *BrownFox) error {
-	return nil
-}
-
-func Restore(b *BrownFox) error {
-	return nil
-}
-
-func Inject(b *BrownFox) error {
-	return nil
-}
 
 //===== funcs
 
@@ -56,22 +28,8 @@ func hiddenDir(path string) bool { // just tmp impl
 	return last[0] == '.' && last[1] != '.'
 }
 
-func listGoFile(path string) []string {
-	// fis, err := ioutil.ReadDir(path)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// farray := []string{}
-	// for _, fi := range fis {
-	// 	if fi.IsDir() {
-	// 		continue
-	// 	}
-	// 	if strings.HasSuffix(fi.Name(), ".go") && !strings.HasSuffix(fi.Name(), "_test.go") {
-	// 		farray = append(farray, path+"/"+fi.Name())
-	// 	}
-	// }
-	// return farray
-	return listSuffixFile(path, []string{".go"}, "_test.go")
+func ListGoFile(path string) []string {
+	return listSuffixFile(path, []string{".go"}, "_test.go", "_lzdgen.go")
 }
 
 func listSuffixFile(path string, include []string, exclude ...string) []string {
@@ -98,16 +56,16 @@ func listSuffixFile(path string, include []string, exclude ...string) []string {
 	return farray
 }
 
-func listGofileByPaths(paths []string) []string {
+func ListGoFileByPaths(paths []string) []string {
 	ret := []string{}
 	for _, path := range paths {
-		fs := listGoFile(path)
+		fs := ListGoFile(path)
 		ret = append(ret, fs...)
 	}
 	return ret
 }
 
-func treeDir(path string, deepth int) []string {
+func TreeDir(path string, deepth int) []string {
 	if hiddenDir(path) {
 		return []string{}
 	}
@@ -122,7 +80,7 @@ func treeDir(path string, deepth int) []string {
 			if deepth != -1 {
 				nextDeepth = deepth - 1
 			}
-			paths = append(paths, treeDir(path+"/"+fi.Name(), nextDeepth)...)
+			paths = append(paths, TreeDir(path+"/"+fi.Name(), nextDeepth)...)
 		}
 	}
 
@@ -156,11 +114,11 @@ func copyFile(src string, dst string) error {
 }
 
 //===========
-type jumper struct {
+type Jumper struct {
 }
 
-func (j *jumper) backupPath(path string) error {
-	files := listGoFile(path)
+func (j *Jumper) BackupPath(path string) error {
+	files := ListGoFile(path)
 	for _, fn := range files {
 		if err := copyFile(fn, backupFileName(fn)); err != nil {
 			return err
@@ -169,10 +127,14 @@ func (j *jumper) backupPath(path string) error {
 	return nil
 }
 
-func (j *jumper) restorePath(path string) error {
+func (j *Jumper) RestorePath(path string) error {
 	files := listSuffixFile(path, []string{".go" + BackupSuffix})
 	for _, fn := range files {
 		if err := copyFile(fn, restoreFileName(fn)); err != nil {
+			return err
+		}
+
+		if err := os.Remove(fn); err != nil {
 			return err
 		}
 	}

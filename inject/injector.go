@@ -5,6 +5,8 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io/ioutil"
+	"strings"
 )
 
 const INJECT = `
@@ -22,7 +24,7 @@ type Injector struct {
 	Mystate  ast.Stmt
 }
 
-func (i *Injector) Inject(f ast.Decl) error {
+func (i *Injector) InjectFunc(f ast.Decl) error {
 
 	fd, ok := f.(*ast.FuncDecl)
 	if !ok {
@@ -35,6 +37,22 @@ func (i *Injector) Inject(f ast.Decl) error {
 	newList = append(newList, fd.Body.List...)
 
 	fd.Body.List = newList
+	return nil
+}
+
+func (i *Injector) InjectFile(path string) error {
+	fset := token.NewFileSet()
+	fbytes, err := ioutil.ReadFile(path)
+	index := strings.LastIndex(path, `/`)
+	f, err := parser.ParseFile(fset, string(path[index+1:]), fbytes, 0)
+	if err != nil {
+		return err
+	}
+
+	for _, decl := range f.Decls {
+		i.InjectFunc(decl)
+	}
+
 	return nil
 }
 
