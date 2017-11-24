@@ -42,7 +42,9 @@ func (b *BrownFox) Restore() error {
 			return err
 		}
 		gofiles := file.ListGoFile(dir, false)
-
+		if len(gofiles) == 0 {
+			continue
+		}
 		parser := inject.NewParser(token.NewFileSet(), gofiles[0])
 		if err := parser.Parse(); err != nil {
 			return err
