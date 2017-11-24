@@ -1,0 +1,5 @@
+package expdir
+
+func Foo() {
+
+}
