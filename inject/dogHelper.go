@@ -20,7 +20,7 @@ func init() {
 //  dont edit this file
 func __traceStack() {
 	caller, file, line := __caller()
-	fmt.Printf("[lazydog] %s:%d caller= %s  \n", __prettyFile(file), line, __prettyCaller(caller))
+	fmt.Printf("[lazydog][%s] %s:%d caller= %s  \n", __curGid(), __prettyFile(file), line, __prettyCaller(caller))
 }
 
 // from https://stackoverflow.com/questions/35212985/is-it-possible-get-information-about-caller-function-in-golang
@@ -57,4 +57,10 @@ func __prettyFile(file string) string {
 		}
 	}
 	return file
+}
+
+func __curGid() string {
+	var buf [64]byte
+	runtime.Stack(buf[:], false)
+	return strings.Fields(strings.TrimPrefix(string(buf[:]), "goroutine "))[0]
 }
