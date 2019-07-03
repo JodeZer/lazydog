@@ -5,7 +5,7 @@ import (
 	"github.com/JodeZer/lazydog/example/expdir/expdir2/expdir2_1"
 	"github.com/JodeZer/lazydog/example/expdir/expdir2/expdir3"
 	"github.com/JodeZer/lazydog/example/expdir/expdir2/expdir3/expdir4"
-	"github.com/jodezer/lazydog/example/expdir"
+	"github.com/JodeZer/lazydog/example/expdir"
 )
 
 func main() {
